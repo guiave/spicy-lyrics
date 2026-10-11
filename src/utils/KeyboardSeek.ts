@@ -1,7 +1,7 @@
 import { PageContainer } from "../components/Pages/PageView.ts";
 import { SpotifyPlayer } from "../components/Global/SpotifyPlayer.ts";
-
-const SEEK_STEP_MS = 5000;
+import { $currentLyricsType } from "./stores.ts";
+import { LyricsObject, type LyricsLine, type LyricsSyllable } from "./Lyrics/lyrics.ts";
 
 function isTextEditingTarget(target: EventTarget | null): boolean {
   const element = target instanceof HTMLElement ? target : null;
@@ -11,14 +11,32 @@ function isTextEditingTarget(target: EventTarget | null): boolean {
   );
 }
 
-function seekBy(delta: number): void {
+function getTimedLines(): Array<LyricsLine | LyricsSyllable> {
+  const type = $currentLyricsType.get();
+  if (type === "Line" || type === "Syllable") {
+    return LyricsObject.Types[type].Lines.filter(
+      (line) => !line.DotLine && line.HTMLElement.textContent?.trim()
+    );
+  }
+  return [];
+}
+
+function seekToAdjacentLine(direction: -1 | 1): void {
   if (!PageContainer || SpotifyPlayer.IsDJ()) return;
 
   const progress = Spicetify.Player.getProgress();
-  const duration = Spicetify.Player.getDuration();
-  if (!Number.isFinite(progress) || !Number.isFinite(duration) || duration <= 0) return;
+  if (!Number.isFinite(progress)) return;
 
-  Spicetify.Player.seek(Math.min(duration, Math.max(0, progress + delta)));
+  const lines = getTimedLines();
+  if (lines.length === 0) return;
+
+  const target =
+    direction > 0
+      ? lines.find((line) => line.StartTime > progress)?.StartTime
+      : [...lines].reverse().find((line) => line.StartTime < progress)?.StartTime;
+
+  if (target === undefined) return;
+  Spicetify.Player.seek(target);
 }
 
 export function registerKeyboardSeek(): () => void {
@@ -28,8 +46,8 @@ export function registerKeyboardSeek(): () => void {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
 
     event.preventDefault();
-    event.stopPropagation();
-    seekBy(event.key === "ArrowRight" ? SEEK_STEP_MS : -SEEK_STEP_MS);
+    event.stopImmediatePropagation();
+    seekToAdjacentLine(event.key === "ArrowRight" ? 1 : -1);
   };
 
   window.addEventListener("keydown", onKeyDown, true);

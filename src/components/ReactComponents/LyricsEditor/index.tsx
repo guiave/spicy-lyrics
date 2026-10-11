@@ -23,7 +23,11 @@ type LyricsPayload = {
 function getLineText(type: string, line: Record<string, any>): string {
   if (type === "Static") return line.Text ?? "";
   if (type === "Line") return line.Text ?? "";
-  return (line.Lead?.Syllables ?? []).map((syllable: any) => syllable.Text ?? "").join("");
+  return (line.Lead?.Syllables ?? [])
+    .map((syllable: any, index: number) =>
+      `${index > 0 && !syllable.IsPartOfWord ? " " : ""}${syllable.Text ?? ""}`
+    )
+    .join("");
 }
 
 function getEditorLines(payload: LyricsPayload): EditorLine[] {
