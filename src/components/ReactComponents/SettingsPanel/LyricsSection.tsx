@@ -90,7 +90,7 @@ export default function LyricsSection({ query, sectionFilter }: Props) {
           <Slider
             value={fullscreenLyricsScale}
             min={60}
-            max={180}
+            max={240}
             step={5}
             defaultValue={100}
             unit="%"

@@ -57,7 +57,9 @@
 }
 
 #SpicyLyricsPage.Fullscreen .LyricsContainer .LyricsContent {
-  --DefaultLyricsSize: calc(clamp(1.85rem, calc(1cqw * 7), 3.5rem) * var(--FullscreenLyricsScale));
+  --DefaultLyricsSize: calc(
+    clamp(2.25rem, min(10cqw, 14cqh), 8rem) * var(--FullscreenLyricsScale)
+  );
 }
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
@@ -75,10 +77,15 @@
   .LyricsContent:has(.line.Active)
   .VirtualLyricsContainer
   .line.Active {
-  display: block;
-  min-height: clamp(220px, 68cqh, 720px);
+  display: flex !important;
+  width: 100%;
+  height: clamp(220px, 68cqh, 720px);
+  min-height: 0;
   box-sizing: border-box;
   padding: clamp(16px, 4cqh, 48px) clamp(8px, 2cqw, 32px);
+  align-items: center;
+  align-content: center;
+  justify-content: center !important;
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
