@@ -62,6 +62,7 @@ import { IsPIP, _IsPIP_after, ClosePopupLyrics } from "../Utils/PopupLyrics.ts";
 import { NPVCardOwnsPage, DeRenderNPVCard } from "../Utils/NPVLyrics.ts";
 import { CleanUpIsByCommunity } from "../../utils/Lyrics/Applyer/Credits/ApplyIsByCommunity.tsx";
 import { OpenLyricsDBPanel } from "../../utils/openLyricsDBPanel.tsx";
+import { OpenCurrentLyricsEditor } from "../ReactComponents/LyricsEditor/index.tsx";
 import { openSettingsPanel } from "../../utils/settings.ts";
 import Logger from "../../utils/Logger.ts";
 import { setStockPlaybarPage } from "../../utils/themeMatcher.ts";
@@ -85,6 +86,7 @@ export const Tooltips: {
   CinemaView: TippyInstance | null;
   NowBarSideToggle: TippyInstance | null;
   LyricsManager: TippyInstance | null;
+  EditLyrics: TippyInstance | null;
   Settings: TippyInstance | null;
 } = {
   Close: null,
@@ -95,6 +97,7 @@ export const Tooltips: {
   CinemaView: null,
   NowBarSideToggle: null,
   LyricsManager: null,
+  EditLyrics: null,
   Settings: null,
 };
 
@@ -549,6 +552,11 @@ function AppendViewControls(ReAppend: boolean = false) {
             ? `<button id="LyricsManager" class="ViewControl">${Icons.LyricsManager}</button>`
             : ""
         }
+        ${
+          !isNoLyrics && $currentLyricsData.get()
+            ? `<button id="EditLyrics" class="ViewControl">${Icons.EditLyrics}</button>`
+            : ""
+        }
         ${IsPIP ? "" : `<button id="SettingsToggle" class="ViewControl">${Icons.Settings}</button>`}
         <button id="Close" class="ViewControl">${Icons.Close}</button>
     `;
@@ -805,6 +813,21 @@ function AppendViewControls(ReAppend: boolean = false) {
         });
       } catch (err) {
         controlsLogger.warn("Failed to setup Lyrics Manager tooltip", err);
+      }
+
+      const editLyricsButton = elem.querySelector("#EditLyrics");
+      if (editLyricsButton) {
+        try {
+          if (!isPip) {
+            Tooltips.EditLyrics = createTooltip(editLyricsButton, {
+              ...Spicetify.TippyProps,
+              content: `Edit current lyrics`,
+            });
+          }
+          editLyricsButton.addEventListener("click", () => OpenCurrentLyricsEditor());
+        } catch (err) {
+          controlsLogger.warn("Failed to setup lyrics editor tooltip", err);
+        }
       }
     }
   }

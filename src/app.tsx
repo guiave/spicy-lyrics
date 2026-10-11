@@ -47,6 +47,7 @@ import { CheckForUpdates } from "./utils/version/CheckForUpdates.tsx";
 import { needsMigration, showMigrationModal } from "./utils/migration/DataMigration.tsx";
 import "./css/settings-panel.css";
 import "./components/ReactComponents/LyricsManager/styles.css";
+import "./components/ReactComponents/LyricsEditor/styles.css";
 import "./css/polyfills/generic-modal-polyfill.css";
 import "./css/NoticeDialog.css";
 import "./css/polyfills/sonner-polyfill.css";
@@ -66,6 +67,7 @@ import Whentil from "./modules/Whentil.ts";
 import App from "./utils/app.ts";
 import { initSession } from "./utils/SessionManager/index.ts";
 import { jitter } from "./utils/jitter.ts";
+import { registerKeyboardSeek } from "./utils/KeyboardSeek.ts";
 
 async function main() {
   const appLogger = new Logger("App");
@@ -365,6 +367,7 @@ async function main() {
 
   // Add shift key tracking
   Global.Saves.shift_key_pressed = false;
+  registerKeyboardSeek();
 
   window.addEventListener("keydown", (e) => {
     if (e.key === "Shift") {
