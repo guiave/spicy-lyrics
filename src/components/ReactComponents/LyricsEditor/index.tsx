@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { flushSync } from "react-dom";
 import { toast } from "sonner";
@@ -23,11 +23,16 @@ type LyricsPayload = {
 function getLineText(type: string, line: Record<string, any>): string {
   if (type === "Static") return line.Text ?? "";
   if (type === "Line") return line.Text ?? "";
-  return (line.Lead?.Syllables ?? [])
-    .map((syllable: any, index: number) =>
-      `${index > 0 && !syllable.IsPartOfWord ? " " : ""}${syllable.Text ?? ""}`
-    )
-    .join("");
+  return (line.Lead?.Syllables ?? []).reduce((text: string, syllable: any, index: number) => {
+    const syllableText = String(syllable.Text ?? "");
+    const needsSpace =
+      index > 0 &&
+      !syllable.IsPartOfWord &&
+      text.length > 0 &&
+      !/\s$/.test(text) &&
+      !/^\s/.test(syllableText);
+    return `${text}${needsSpace ? " " : ""}${syllableText}`;
+  }, "");
 }
 
 function getEditorLines(payload: LyricsPayload): EditorLine[] {
@@ -87,6 +92,8 @@ function CurrentLyricsEditor({ onSaved }: { onSaved: () => void }): React.ReactE
     }
   }, []);
   const [lines, setLines] = useState<EditorLine[]>(() => (payload ? getEditorLines(payload) : []));
+  const [query, setQuery] = useState("");
+  const lineRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   if (!payload) {
     return (
@@ -100,6 +107,20 @@ function CurrentLyricsEditor({ onSaved }: { onSaved: () => void }): React.ReactE
     setLines((current) =>
       current.map((line) => (line.sourceIndex === sourceIndex ? { ...line, ...patch } : line))
     );
+  }
+
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const matchingLines = lines.filter(
+    (line) => !normalizedQuery || line.text.toLocaleLowerCase().includes(normalizedQuery)
+  );
+
+  function goToFirstMatch() {
+    const firstMatch = matchingLines[0];
+    if (!firstMatch) return;
+    lineRefs.current[firstMatch.sourceIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    lineRefs.current[firstMatch.sourceIndex]
+      ?.querySelector<HTMLInputElement>("input")
+      ?.focus({ preventScroll: true });
   }
 
   async function save() {
@@ -127,20 +148,51 @@ function CurrentLyricsEditor({ onSaved }: { onSaved: () => void }): React.ReactE
       <p className="sl-lyrics-editor__hint">
         Altere ou remova linhas. As marcações de tempo são preservadas.
       </p>
+      <div className="sl-lyrics-editor__search">
+        <input
+          type="search"
+          value={query}
+          placeholder="Buscar uma linha..."
+          aria-label="Buscar uma linha da letra"
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              goToFirstMatch();
+            }
+          }}
+        />
+        <button type="button" onClick={goToFirstMatch} disabled={!matchingLines.length}>
+          Ir para linha
+        </button>
+        <span className="sl-lyrics-editor__search-count" role="status" aria-live="polite">
+          {normalizedQuery ? `${matchingLines.length} encontrada(s)` : `${lines.length} linhas`}
+        </span>
+      </div>
       <div className="sl-lyrics-editor__list">
         {lines.length === 0 ? (
           <div className="sl-lyrics-editor__state" role="status">
             <p>Todas as linhas foram removidas.</p>
           </div>
+        ) : matchingLines.length === 0 ? (
+          <div className="sl-lyrics-editor__state" role="status">
+            <p>Nenhuma linha contém “{query}”.</p>
+          </div>
         ) : (
-          lines.map((line, index) => (
-            <div className={`sl-lyrics-editor__row${line.deleted ? " is-deleted" : ""}`} key={line.sourceIndex}>
-              <span className="sl-lyrics-editor__index" aria-hidden="true">{index + 1}</span>
+          matchingLines.map((line) => (
+            <div
+              className={`sl-lyrics-editor__row${line.deleted ? " is-deleted" : ""}`}
+              key={line.sourceIndex}
+              ref={(element) => {
+                lineRefs.current[line.sourceIndex] = element;
+              }}
+            >
+              <span className="sl-lyrics-editor__index" aria-hidden="true">{line.sourceIndex + 1}</span>
               <input
                 type="text"
                 value={line.text}
                 disabled={line.deleted}
-                aria-label={`Linha ${index + 1}`}
+                aria-label={`Linha ${line.sourceIndex + 1}`}
                 onChange={(event) => updateLine(line.sourceIndex, { text: event.target.value })}
               />
               <button
