@@ -79,13 +79,15 @@
   .line.Active {
   display: flex !important;
   width: 100%;
-  height: clamp(220px, 68cqh, 720px);
-  min-height: 0;
+  height: clamp(220px, 68cqh, 720px) !important;
+  min-height: 0 !important;
   box-sizing: border-box;
   padding: clamp(16px, 4cqh, 48px) clamp(8px, 2cqw, 32px);
   align-items: center;
   align-content: center;
   justify-content: center !important;
+  position: relative;
+  top: clamp(24px, 8cqh, 96px);
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -103,6 +105,23 @@
   .line.Active
   .word-group {
   white-space: normal;
+}
+
+/* Musical interludes have a zero-height base rule so they disappear between
+   sung lines. In the projector mode the active interlude is a real display
+   state, so it needs the same measured box as a vocal line; otherwise its
+   dots stay near the old scroll position instead of the usable area below
+   the artist metadata. */
+#SpicyLyricsPage.Fullscreen.FullscreenSingleLine
+  .LyricsContainer
+  .LyricsContent:has(.line.Active)
+  .VirtualLyricsContainer
+  .line.musical-line.Active {
+  height: clamp(220px, 68cqh, 720px) !important;
+  min-height: 0 !important;
+  line-height: normal !important;
+  overflow: visible !important;
+  z-index: 1 !important;
 }
 
 #SpicyLyricsPage:not(.Fullscreen):has(.ViewControls .ViewControl:hover) .LyricsContainer .LyricsContent {
