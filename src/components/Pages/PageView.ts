@@ -301,7 +301,13 @@ async function OpenPage(
   if ($showVolumeSlider.get()) {
     elem.classList.add("ShowVolumeSlider");
   }
-  elem.style.setProperty("--FullscreenLyricsScale", `${$fullscreenLyricsScale.get() / 100}`);
+  const fullscreenScale = `${$fullscreenLyricsScale.get() / 100}`;
+  elem.style.setProperty("--FullscreenLyricsScale", fullscreenScale);
+  elem.querySelector<HTMLElement>(".LyricsContent")?.style.setProperty(
+    "--FullscreenLyricsScale",
+    fullscreenScale,
+    "important"
+  );
   elem.classList.toggle("FullscreenSingleLine", $fullscreenSingleLine.get());
 
   ApplyExperimentClasses(elem);
@@ -878,7 +884,8 @@ function applyFullscreenLyricsSettings(): void {
   PageContainer.style.setProperty("--FullscreenLyricsScale", scale);
   PageContainer.querySelector<HTMLElement>(".LyricsContent")?.style.setProperty(
     "--FullscreenLyricsScale",
-    scale
+    scale,
+    "important"
   );
   PageContainer.classList.toggle("FullscreenSingleLine", $fullscreenSingleLine.get());
   triggerRemeasureLV();

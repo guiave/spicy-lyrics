@@ -59,7 +59,7 @@
 #SpicyLyricsPage.Fullscreen .LyricsContainer .LyricsContent {
   --DefaultLyricsSize: calc(
     clamp(2.25rem, min(10cqw, 14cqh), 8rem) * var(--FullscreenLyricsScale)
-  );
+  ) !important;
 }
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
