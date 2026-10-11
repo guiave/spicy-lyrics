@@ -874,8 +874,14 @@ $showVolumeSlider.listen((v) => {
 
 function applyFullscreenLyricsSettings(): void {
   if (!PageContainer) return;
-  PageContainer.style.setProperty("--FullscreenLyricsScale", `${$fullscreenLyricsScale.get() / 100}`);
+  const scale = `${$fullscreenLyricsScale.get() / 100}`;
+  PageContainer.style.setProperty("--FullscreenLyricsScale", scale);
+  PageContainer.querySelector<HTMLElement>(".LyricsContent")?.style.setProperty(
+    "--FullscreenLyricsScale",
+    scale
+  );
   PageContainer.classList.toggle("FullscreenSingleLine", $fullscreenSingleLine.get());
+  triggerRemeasureLV();
 }
 
 $fullscreenLyricsScale.listen(() => applyFullscreenLyricsSettings());

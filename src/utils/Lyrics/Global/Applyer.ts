@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { $currentLyricsData, $currentLyricsType } from "../../stores.ts";
+import { $currentLyricsData, $currentLyricsType, getLyricsOverride } from "../../stores.ts";
 import { ClearScrollSimplebar } from "../../Scrolling/Simplebar/ScrollSimplebar.ts";
 import { setBlurringLastLine } from "../Animator/Lyrics/LyricsAnimator.ts";
 import { DestroyAllLyricsContainers } from "../Applyer/CreateLyricsContainer.ts";
@@ -52,7 +52,7 @@ export default async function ApplyLyrics(lyricsContent: FetchLyricsResult): Pro
     return;
   }
 
-  const [descriptor, _status, requestedUri] = lyricsContent;
+  const [fetchedDescriptor, _status, requestedUri] = lyricsContent;
 
   // Fetching is async, so a result can land after the user has already skipped
   // on. Applying it would paint the previous track's lyrics — or its "no
@@ -62,6 +62,10 @@ export default async function ApplyLyrics(lyricsContent: FetchLyricsResult): Pro
   // leave the current track's own apply to do the work.
   const currentUri = SpotifyPlayer.GetUri();
   if (requestedUri && currentUri && requestedUri !== currentUri) return;
+  const descriptor =
+    typeof fetchedDescriptor === "object" && requestedUri
+      ? getLyricsOverride(requestedUri) ?? fetchedDescriptor
+      : fetchedDescriptor;
 
   // Every apply takes a token, so one parked on the skeleton frame below can
   // tell that any later apply — notice or lyrics — has already painted.

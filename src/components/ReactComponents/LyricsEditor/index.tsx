@@ -4,8 +4,14 @@ import { flushSync } from "react-dom";
 import { toast } from "sonner";
 import { PopupModal } from "../../Modal.ts";
 import ApplyLyrics from "../../../utils/Lyrics/Global/Applyer.ts";
+import fetchLyrics from "../../../utils/Lyrics/fetchLyrics.ts";
 import { SpotifyPlayer } from "../../Global/SpotifyPlayer.ts";
-import { $currentLyricsData } from "../../../utils/stores.ts";
+import {
+  $currentLyricsData,
+  getLyricsOverride,
+  removeLyricsOverride,
+  setLyricsOverride,
+} from "../../../utils/stores.ts";
 
 type EditorLine = {
   sourceIndex: number;
@@ -139,7 +145,31 @@ function CurrentLyricsEditor({ onSaved }: { onSaved: () => void }): React.ReactE
       return;
     }
     $currentLyricsData.set(JSON.stringify(edited));
+    setLyricsOverride(uri, edited);
     toast.success("Letra atualizada.");
+    onSaved();
+  }
+
+  async function resetToOriginal() {
+    const uri = SpotifyPlayer.GetUri();
+    if (!uri) {
+      toast.error("Não foi possível identificar a música atual.");
+      return;
+    }
+    try {
+      const original = await fetchLyrics(uri);
+      if (!original) {
+        toast.error("Não foi possível carregar a letra original.");
+        return;
+      }
+      removeLyricsOverride(uri);
+      await ApplyLyrics(original);
+    } catch (error) {
+      console.error("SpicyLyrics: failed to restore original lyrics", error);
+      toast.error("Não foi possível restaurar a letra original.");
+      return;
+    }
+    toast.success("Letra original restaurada.");
     onSaved();
   }
 
@@ -210,6 +240,14 @@ function CurrentLyricsEditor({ onSaved }: { onSaved: () => void }): React.ReactE
       <div className="sl-lyrics-editor__actions">
         <button type="button" className="sl-lyrics-editor__cancel" onClick={() => PopupModal.hide()}>
           Cancelar
+        </button>
+        <button
+          type="button"
+          className="sl-lyrics-editor__cancel"
+          onClick={resetToOriginal}
+          disabled={!getLyricsOverride(SpotifyPlayer.GetUri() ?? "")}
+        >
+          Redefinir para original
         </button>
         <button type="button" className="sl-lyrics-editor__save" onClick={save}>
           Aplicar alterações

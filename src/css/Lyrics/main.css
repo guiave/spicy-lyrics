@@ -25,7 +25,6 @@
   --StrongTextGlowDef: rgba(255, 255, 255, 0.68) 0px 0px 16.4px;
   --StrongerTextGlowDef: rgba(255, 255, 255, 0.74) 0px 0px 16px;
   --DefaultLyricsSize: clamp(1.85rem, calc(1cqw * 7), 3.5rem);
-  --FullscreenLyricsScale: 1;
   --amll-lyric-player-font-size: var(--DefaultLyricsSize);
   --Simplebar-Scrollbar-Color: rgba(255, 255, 255, 0.6);
   --vertical-gap: 0px;
@@ -63,32 +62,36 @@
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
   .LyricsContainer
-  .LyricsContent
+  .LyricsContent:has(.line.Active)
   .VirtualLyricsContainer
   .line:not(.Active) {
-  opacity: 0;
+  opacity: 0 !important;
+  visibility: hidden;
   pointer-events: none;
 }
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
   .LyricsContainer
-  .LyricsContent
+  .LyricsContent:has(.line.Active)
   .VirtualLyricsContainer
   .line.Active {
-  display: flex;
-  min-height: 68cqh;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  min-height: clamp(220px, 68cqh, 720px);
   box-sizing: border-box;
-  padding: 8cqh 8cqw;
+  padding: clamp(16px, 4cqh, 48px) clamp(8px, 2cqw, 32px);
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
+  opacity: 1 !important;
+  visibility: visible;
+  filter: none !important;
+  scale: 1 !important;
+  z-index: 1;
 }
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
   .LyricsContainer
-  .LyricsContent
+  .LyricsContent:has(.line.Active)
   .VirtualLyricsContainer
   .line.Active
   .word-group {

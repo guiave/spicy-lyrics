@@ -17,6 +17,32 @@ function saveSettingsBlob(obj: Record<string, any>) {
   Spicetify.LocalStorage.set(SETTINGS_KEY, JSON.stringify(obj));
 }
 
+const LYRICS_OVERRIDES_KEY = "lyricsOverrides";
+
+export function getLyricsOverride(uri: string): Record<string, any> | null {
+  const overrides = _settings[LYRICS_OVERRIDES_KEY];
+  const override = overrides?.[uri];
+  return override && typeof override === "object" ? override : null;
+}
+
+export function setLyricsOverride(uri: string, lyrics: Record<string, any>): void {
+  const overrides =
+    _settings[LYRICS_OVERRIDES_KEY] &&
+    typeof _settings[LYRICS_OVERRIDES_KEY] === "object"
+      ? _settings[LYRICS_OVERRIDES_KEY]
+      : {};
+  overrides[uri] = lyrics;
+  _settings[LYRICS_OVERRIDES_KEY] = overrides;
+  saveSettingsBlob(_settings);
+}
+
+export function removeLyricsOverride(uri: string): void {
+  const overrides = _settings[LYRICS_OVERRIDES_KEY];
+  if (!overrides || typeof overrides !== "object" || !(uri in overrides)) return;
+  delete overrides[uri];
+  saveSettingsBlob(_settings);
+}
+
 function migrateSettingsKeys(blob: Record<string, any>): Record<string, any> {
   const renames: Record<string, string> = {
     "skip-spicy-font": "skipSpicyFont",
