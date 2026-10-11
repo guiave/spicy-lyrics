@@ -62,6 +62,9 @@ export const $simpleLyricsModeRenderingType = persistAtom<string>(
 export const $minimalLyricsMode = persistAtom<boolean>("minimalLyricsMode", false);
 // Tinted box drawn behind a lyrics line while the pointer is over it.
 export const $lineHoverBackground = persistAtom<boolean>("lineHoverBackground", true);
+// Fullscreen projector readability controls.
+export const $fullscreenLyricsScale = persistAtom<number>("fullscreenLyricsScale", 100);
+export const $fullscreenSingleLine = persistAtom<boolean>("fullscreenSingleLine", false);
 export const $skipSpicyFont = persistAtom<boolean>("skipSpicyFont", false);
 export const $showNpvDynamicBg = persistAtom<boolean>("showNpvDynamicBg", true);
 // Never inject the lyrics card into the Now Playing sidebar at all.

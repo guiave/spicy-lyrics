@@ -26,6 +26,8 @@ import {
 import ApplyDynamicBackground, { KawarpMap } from "../DynamicBG/dynamicBackground.ts";
 import {
   $currentLyricsData,
+  $fullscreenLyricsScale,
+  $fullscreenSingleLine,
   $lineHoverBackground,
   $lyricsContainerExists,
   $minimalLyricsMode,
@@ -299,6 +301,8 @@ async function OpenPage(
   if ($showVolumeSlider.get()) {
     elem.classList.add("ShowVolumeSlider");
   }
+  elem.style.setProperty("--FullscreenLyricsScale", `${$fullscreenLyricsScale.get() / 100}`);
+  elem.classList.toggle("FullscreenSingleLine", $fullscreenSingleLine.get());
 
   ApplyExperimentClasses(elem);
 
@@ -867,6 +871,15 @@ $showVolumeSlider.listen((v) => {
   if (!PageContainer) return;
   PageContainer.classList.toggle("ShowVolumeSlider", v);
 });
+
+function applyFullscreenLyricsSettings(): void {
+  if (!PageContainer) return;
+  PageContainer.style.setProperty("--FullscreenLyricsScale", `${$fullscreenLyricsScale.get() / 100}`);
+  PageContainer.classList.toggle("FullscreenSingleLine", $fullscreenSingleLine.get());
+}
+
+$fullscreenLyricsScale.listen(() => applyFullscreenLyricsSettings());
+$fullscreenSingleLine.listen(() => applyFullscreenLyricsSettings());
 
 // Experiments own their CSS hook here; NowBar.ts handles the rebuild for the ones
 // that need one. Adding an experiment requires no change to this file.
