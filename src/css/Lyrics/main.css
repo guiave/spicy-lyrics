@@ -87,7 +87,7 @@
   align-content: center;
   justify-content: center !important;
   position: relative;
-  top: clamp(0px, 1.5cqh, 18px);
+  top: clamp(-36px, -3cqh, -12px);
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -122,6 +122,13 @@
   line-height: normal !important;
   overflow: visible !important;
   z-index: 1 !important;
+}
+
+#SpicyLyricsPage.Fullscreen.FullscreenSingleLine
+  .LyricsContainer
+  .LyricsContent
+  .SpicyLyricsScrollContainer {
+  margin-top: 12cqh;
 }
 
 #SpicyLyricsPage:not(.Fullscreen):has(.ViewControls .ViewControl:hover) .LyricsContainer .LyricsContent {
