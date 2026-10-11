@@ -87,7 +87,7 @@
   align-content: center;
   justify-content: center !important;
   position: relative;
-  top: clamp(24px, 8cqh, 96px);
+  top: clamp(0px, 1.5cqh, 18px);
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
