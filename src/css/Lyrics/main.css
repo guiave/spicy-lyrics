@@ -64,9 +64,8 @@
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
   .LyricsContainer
-  .LyricsContent:has(.line.Active)
   .VirtualLyricsContainer
-  .line:not(.Active) {
+  .line:not(.Active):not(.SingleLineFallback) {
   opacity: 0 !important;
   visibility: hidden;
   pointer-events: none;
@@ -74,9 +73,8 @@
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
   .LyricsContainer
-  .LyricsContent:has(.line.Active)
   .VirtualLyricsContainer
-  .line.Active {
+  .line:is(.Active, .SingleLineFallback) {
   display: flex !important;
   width: 100%;
   height: clamp(220px, 68cqh, 720px) !important;
@@ -100,11 +98,21 @@
 
 #SpicyLyricsPage.Fullscreen.FullscreenSingleLine
   .LyricsContainer
-  .LyricsContent:has(.line.Active)
   .VirtualLyricsContainer
-  .line.Active
+  .line:is(.Active, .SingleLineFallback)
   .word-group {
   white-space: normal;
+}
+
+#SpicyLyricsPage.Fullscreen.FullscreenSingleLine
+  .LyricsContainer
+  .LyricsContent
+  .VirtualLyricsContainer
+  .line.SingleLineFallback {
+  opacity: 1 !important;
+  visibility: visible;
+  filter: none !important;
+  scale: 1 !important;
 }
 
 /* Musical interludes have a zero-height base rule so they disappear between

@@ -1,6 +1,6 @@
 import { PageContainer } from "../components/Pages/PageView.ts";
 import { SpotifyPlayer } from "../components/Global/SpotifyPlayer.ts";
-import { $currentLyricsType } from "./stores.ts";
+import { $currentLyricsType, $fullscreenLyricsScale } from "./stores.ts";
 import { LyricsObject, type LyricsLine, type LyricsSyllable } from "./Lyrics/lyrics.ts";
 
 function isTextEditingTarget(target: EventTarget | null): boolean {
@@ -41,7 +41,25 @@ function seekToAdjacentLine(direction: -1 | 1): void {
 
 export function registerKeyboardSeek(): () => void {
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (event.defaultPrevented || event.altKey || event.metaKey) return;
+    if (
+      event.ctrlKey &&
+      PageContainer?.classList.contains("Fullscreen") &&
+      (event.key === "-" ||
+        event.key === "_" ||
+        event.key === "+" ||
+        event.key === "=" ||
+        event.code === "Minus" ||
+        event.code === "Equal")
+    ) {
+      const increase = event.key === "+" || event.key === "=" || event.code === "Equal";
+      const current = $fullscreenLyricsScale.get();
+      $fullscreenLyricsScale.set(Math.max(60, Math.min(240, current + (increase ? 5 : -5))));
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    if (event.ctrlKey || event.shiftKey) return;
     if (isTextEditingTarget(event.target)) return;
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
 

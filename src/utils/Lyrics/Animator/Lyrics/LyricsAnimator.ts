@@ -652,6 +652,9 @@ export function Animate(position: number): void {
   // Whether every mounted line has been sung, for LinesAllSung below.
   let mountedLine: HTMLElement | null = null;
   let anyLineUnsung = false;
+  let fallbackLine: HTMLElement | null = null;
+  let hasActiveLine = false;
+  const processedLineElements: HTMLElement[] = [];
 
   if (CurrentLyricsType === "Syllable") {
     const arr = LyricsObject.Types.Syllable.Lines;
@@ -661,9 +664,12 @@ export function Animate(position: number): void {
       if (!line.HTMLElement.isConnected) continue;
       const lineState = getElementState(ProcessedPosition, line.StartTime, line.EndTime);
       mountedLine ??= line.HTMLElement;
+      processedLineElements.push(line.HTMLElement);
       if (lineState !== "Sung") anyLineUnsung = true;
 
       if (lineState === "Active") {
+        hasActiveLine = true;
+        fallbackLine = null;
         if (Blurring_LastLine !== index) {
           applyBlur(arr, index, BlurMultiplier);
           //applyScale(arr, index);
@@ -1349,6 +1355,7 @@ export function Animate(position: number): void {
                   }
               } */
       } else if (lineState === "Sung") {
+        if (!line.DotLine) fallbackLine = line.HTMLElement;
         setClass(line.HTMLElement, "Sung", true);
         setClass(line.HTMLElement, "Active", false);
         setClass(line.HTMLElement, "NotSung", false);
@@ -1655,9 +1662,12 @@ export function Animate(position: number): void {
       if (!line.HTMLElement.isConnected) continue;
       const lineState = getElementState(ProcessedPosition, line.StartTime, line.EndTime);
       mountedLine ??= line.HTMLElement;
+      processedLineElements.push(line.HTMLElement);
       if (lineState !== "Sung") anyLineUnsung = true;
 
       if (lineState === "Active") {
+        hasActiveLine = true;
+        fallbackLine = null;
         if (Blurring_LastLine !== index) {
           applyBlur(arr, index, BlurMultiplier);
           //applyScale(arr, index);
@@ -1823,6 +1833,7 @@ export function Animate(position: number): void {
           line.HTMLElement.classList.add("pre-hidden");
         }
       } else if (lineState === "Sung") {
+        if (!line.DotLine) fallbackLine = line.HTMLElement;
         if (!line.HTMLElement.classList.contains("Sung")) {
           line.HTMLElement.classList.add("Sung");
         }
@@ -1844,7 +1855,16 @@ export function Animate(position: number): void {
   // in Mixed.css: with line classes inside a :has(), every line change made
   // Blink re-check the page's ancestors, up to <html>.
   const lyricsContent = mountedLine?.closest<HTMLElement>(".LyricsContent");
-  if (lyricsContent) setClass(lyricsContent, "LinesAllSung", !anyLineUnsung);
+  if (lyricsContent) {
+    setClass(lyricsContent, "LinesAllSung", !anyLineUnsung);
+    for (const lineElement of processedLineElements) {
+      setClass(
+        lineElement,
+        "SingleLineFallback",
+        !hasActiveLine && lineElement === fallbackLine
+      );
+    }
+  }
 
   // Commit any queued style changes after completing the animation computations
   flushStyleBatch();
